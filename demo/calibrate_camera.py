@@ -10,6 +10,7 @@ from subprocess import call
 import cv2
 import numpy as np
 from os import path
+import os
 
 from camera import cam_calibrate
 
@@ -18,7 +19,7 @@ from camera import cam_calibrate
 # Start camera
 #################################
 
-cam_idx = 0
+cam_idx = int(os.environ.get("CAMERA_INDEX", "1"))
 
 # adjust these for your camera to get the best accuracy
 # use the same parameters to run the actual demoqsqq

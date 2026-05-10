@@ -10,12 +10,14 @@ import sys
 import cv2
 import numpy as np
 from collections import OrderedDict
+from os import path
 
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 
-sys.path.append("ext/HRNet-Facial-Landmark-Detection")
+BASE_DIR = path.dirname(path.abspath(__file__))
+sys.path.append(path.join(BASE_DIR, "ext", "HRNet-Facial-Landmark-Detection"))
 from lib.config import config
 import lib.models as models
 from lib.datasets import get_dataset
@@ -26,10 +28,14 @@ from face import face
 
 class landmarks:
 
-    def __init__(self, config=config):
+    def __init__(self, config=config, device=None):
+
+        if device is None:
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = device
 
         config.defrost()
-        config.merge_from_file("ext/HRNet-Facial-Landmark-Detection/experiments/wflw/face_alignment_wflw_hrnet_w18.yaml")
+        config.merge_from_file(path.join(BASE_DIR, "ext", "HRNet-Facial-Landmark-Detection", "experiments", "wflw", "face_alignment_wflw_hrnet_w18.yaml"))
         config.freeze()
 
         cudnn.benchmark = config.CUDNN.BENCHMARK
@@ -44,8 +50,12 @@ class landmarks:
         state_dict = torch.load("ext/HRNet-Facial-Landmark-Detection/hrnetv2_pretrained/HR18-WFLW.pth")
         self.model.load_state_dict(state_dict, strict=False)
 
-        gpus = list(config.GPUS)
-        self.model = nn.DataParallel(self.model, device_ids=gpus).cuda()
+        # Move model to appropriate device (CPU or GPU)
+        if self.device.type == 'cuda':
+            gpus = list(config.GPUS)
+            self.model = nn.DataParallel(self.model, device_ids=gpus).to(self.device)
+        else:
+            self.model = self.model.to(self.device)
 
     def map_to_300vw(self):
 
@@ -130,7 +140,7 @@ class landmarks:
         img = (img / 255.0 - img_mean) / img_std
         img = img.transpose([2, 0, 1])
         img = np.expand_dims(img, axis=0)
-        img = torch.Tensor(img)
+        img = torch.Tensor(img).to(self.device)
 
         self.model.eval()
         output = self.model(img)

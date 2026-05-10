@@ -14,8 +14,10 @@ import pickle
 import sys
 import os
 import torch
+from os import path
 
-sys.path.append("ext/eth")
+BASE_DIR = path.dirname(path.abspath(__file__))
+sys.path.append(path.join(BASE_DIR, "ext", "eth"))
 from undistorter import Undistorter
 from KalmanFilter1D import Kalman1D
 
@@ -26,7 +28,11 @@ from normalization import normalize
 
 class frame_processer:
 
-    def __init__(self, cam_calib):
+    def __init__(self, cam_calib, device=None):
+
+        if device is None:
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = device
 
         self.cam_calib = cam_calib
 
@@ -51,7 +57,7 @@ class frame_processer:
         self.kalman_filter_gaze.append(Kalman1D(sz=100, R=0.01 ** 2))
 
         self.undistorter = Undistorter(self.cam_calib['mtx'], self.cam_calib['dist'])
-        self.landmarks_detector = landmarks()
+        self.landmarks_detector = landmarks(device=self.device)
         self.head_pose_estimator = PnPHeadPoseEstimator()
 
 
@@ -60,7 +66,7 @@ class frame_processer:
         g_t = None
         data = {'image_a': [], 'gaze_a': [], 'head_a': [], 'R_gaze_a': [], 'R_head_a': []}
         if por_available:
-            f = open('./%s_calib_target.pkl' % subject, 'rb')
+            f = open(path.join(BASE_DIR, '%s_calib_target.pkl' % subject), 'rb')
             targets = pickle.load(f)
 
         frames_read = 0

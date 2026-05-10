@@ -1,0 +1,7 @@
+.git
+src/outputs_of_full_train_test_and_plot/
+preprocess/
+demo/demo_weights/
+demo/venv/
+**/__pycache__/
+**/*.pyc

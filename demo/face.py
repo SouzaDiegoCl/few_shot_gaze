@@ -8,8 +8,10 @@
 
 import sys
 import cv2
+from os import path
 
-sys.path.append("ext/mtcnn-pytorch/")
+BASE_DIR = path.dirname(path.abspath(__file__))
+sys.path.append(path.join(BASE_DIR, "ext", "mtcnn-pytorch"))
 from src import detect_faces, show_bboxes
 from PIL import Image
 

@@ -1,2 +1,17 @@
 __pycache__/
 src/output*
+
+# Calibration and training data
+demo/*_calib.avi
+demo/*_calib_target.pkl
+demo/*_gaze_network.pth.tar
+demo/calib_cam*.pkl
+
+# Large weights files
+demo/demo_weights.zip
+demo/demo_weights/
+
+# Python cache
+*.pyc
+*.pyo
+*.pyd

@@ -12,9 +12,11 @@ import random
 import threading
 import pickle
 import sys
+from os import path
 
 import torch
-sys.path.append("../src")
+BASE_DIR = path.dirname(path.abspath(__file__))
+sys.path.append(path.abspath(path.join(BASE_DIR, "..", "src")))
 from losses import GazeAngularLoss
 
 directions = ['l', 'r', 'u', 'd']
@@ -144,7 +146,7 @@ def fine_tune(subject, data, frame_processor, mon, device, gaze_network, k, step
 
     # collect person calibration data
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('%s_calib.avi' % subject, fourcc, 30.0, (640, 480))
+    out = cv2.VideoWriter(path.join(BASE_DIR, '%s_calib.avi' % subject), fourcc, 30.0, (640, 480))
     target = []
     for index, frames in enumerate(data['frames']):
         n = 0
@@ -162,11 +164,11 @@ def fine_tune(subject, data, frame_processor, mon, device, gaze_network, k, step
             n += 1
     cv2.destroyAllWindows()
     out.release()
-    fout = open('%s_calib_target.pkl' % subject, 'wb')
+    fout = open(path.join(BASE_DIR, '%s_calib_target.pkl' % subject), 'wb')
     pickle.dump(target, fout)
     fout.close()
 
-    vid_cap = cv2.VideoCapture('%s_calib.avi' % subject)
+    vid_cap = cv2.VideoCapture(path.join(BASE_DIR, '%s_calib.avi' % subject))
     data = frame_processor.process(subject, vid_cap, mon, device, gaze_network, por_available=True, show=show)
     vid_cap.release()
 

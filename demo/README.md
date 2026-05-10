@@ -30,6 +30,17 @@ b. Create a Python virtual environment:
     sudo apt install g++-7 -y
     CC=`which gcc-7` CXX=`which g++-7` pip3 install eos-py
 
+If you prefer to run the demo in Docker on an SELinux-enabled Linux host, relabel the bind mount with `:Z` so the container can read the files under `/work`:
+
+    sudo docker run --gpus all -it --rm \
+        --device /dev/video0 \
+        -e DISPLAY=$DISPLAY \
+        -e QT_X11_NO_MITSHM=1 \
+        -v /tmp/.X11-unix:/tmp/.X11-unix \
+        -v "$PWD":/work:Z \
+        -w /work/demo \
+        few-shot-gaze-demo
+
 ### 2. Camera and Monitor calibration
   a. Calibrate your camera:
 
